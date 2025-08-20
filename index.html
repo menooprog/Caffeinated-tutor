@@ -1,240 +1,549 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Caffeinated Tutor ☕</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Caffeinated Tutor — Math Solver</title>
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Math.js & Algebrite -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.4.0/algebrite.min.js"></script>
+  <!-- math libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  <script src="https://unpkg.com/algebrite"></script>
 
-  <!-- MathJax -->
+  <!-- MathJax for nice math rendering -->
   <script>
-    window.MathJax = {
-      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-      svg: { fontCache: 'global' }
-    };
+    window.MathJax = { tex: { inlineMath: [['$','$'], ['\\(','\\)']] }, svg: { fontCache: 'global' } };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
   <style>
-    body {
-      background: linear-gradient(135deg, #fde2e4, #cdb4db, #fff1c1, #caffbf, #ffd6a5);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
+    :root{
+      --p1:#ffd7e7; --p2:#e8ddff; --p3:#fff2cc; --p4:#ffe6cc; --p5:#e9ffef;
+      --card: rgba(255,255,255,.85);
+      --radius: 16px;
     }
-    @keyframes gradient {
-      0% {background-position:0% 50%;}
-      50% {background-position:100% 50%;}
-      100% {background-position:0% 50%;}
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg,var(--p5),var(--p2),var(--p1));
+      min-height:100vh;
+      margin:0;
     }
+    .container{max-width:1100px;margin:28px auto;padding:20px;background:var(--card);border-radius:22px;box-shadow:0 14px 40px rgba(0,0,0,0.08)}
+    .section{border-radius:14px;padding:16px;margin-bottom:18px;box-shadow:0 6px 18px rgba(0,0,0,0.03);background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.8))}
+    .io{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(250,250,255,0.9));border-radius:12px;padding:12px}
+    input, select, textarea{padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-size:14px}
+    .btn{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .small{font-size:13px;color:#555}
+    pre {white-space:pre-wrap;word-wrap:break-word}
+    .icon {width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px}
+    @media(max-width:900px){ .io{flex-direction:column;align-items:stretch} }
   </style>
 </head>
-<body class="font-sans text-gray-800">
+<body>
+  <div class="container">
+    <header class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-4">
+        <div style="width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,var(--p1),var(--p3));display:flex;align-items:center;justify-content:center;font-weight:800">☕</div>
+        <div>
+          <h1 style="margin:0;font-size:22px">Caffeinated Tutor</h1>
+          <div class="small">Made by <strong>Syeda Manahil</strong></div>
+        </div>
+      </div>
+      <div class="small">Cute pastel math cafe — answers + manual steps</div>
+    </header>
 
-  <!-- Header -->
-  <header class="bg-pink-200 shadow-md p-4 sticky top-0 z-50 flex justify-between items-center">
-    <h1 class="text-2xl font-bold">☕ Caffeinated Tutor</h1>
-    <span class="italic">Created by Syeda Manahil 💖</span>
-  </header>
+    <!-- Differentiation (advanced) -->
+    <section class="section" id="diffSection">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">🔺 Differentiation (symbolic)</h2>
+        <div class="small">Supports higher-order and definite derivatives</div>
+      </div>
 
-  <!-- Main -->
-  <main class="space-y-10 p-6">
+      <div class="io">
+        <div style="flex:1" class="card">
+          <label class="small">Expression (in variable x):</label>
+          <input id="diffExpr" placeholder="e.g. sin(x)^2 + x^3" style="width:100%" />
+          <div class="mt-2 flex gap-2 items-center">
+            <input id="diffOrder" placeholder="order (default 1)" style="width:140px" />
+            <input id="diffAt" placeholder="Evaluate at (optional) e.g. pi/2" style="width:160px" />
+            <button class="btn" style="background:linear-gradient(90deg,var(--p2),var(--p1))" onclick="doDifferentiate()">Differentiate</button>
+          </div>
+        </div>
 
-    <!-- Differentiation -->
-    <section class="bg-white/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">🔺 Differentiation</h2>
-      <input id="diffInput" type="text" placeholder="e.g. x^3 + 2x" class="mt-2 p-2 w-full border rounded-xl"/>
-      <button onclick="differentiate()" class="mt-3 px-4 py-2 bg-pink-300 rounded-xl">Solve</button>
-      <div class="mt-4">
-        <div class="bg-pink-100 rounded-xl p-3"><strong>Answer:</strong> <span id="diffOutput"></span></div>
-        <div class="bg-yellow-100 rounded-xl p-3 mt-2"><strong>Steps:</strong> <span id="diffSteps"></span></div>
+        <div style="width:360px" class="card">
+          <div><strong>Answer</strong></div>
+          <div id="diffAnswer" class="mt-2 small">—</div>
+          <hr class="my-2" />
+          <div><strong>Steps</strong></div>
+          <pre id="diffSteps" class="mt-2 small">—</pre>
+        </div>
       </div>
     </section>
 
-    <!-- Integration -->
-    <section class="bg-pink/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">∫ Integration</h2>
-      <input id="intInput" type="text" placeholder="e.g. x^2" class="mt-2 p-2 w-full border rounded-xl"/>
-      <button onclick="integrate()" class="mt-3 px-4 py-2 bg-lime-300 rounded-xl">Solve</button>
-      <div class="mt-4">
-        <div class="bg-green-100 rounded-xl p-3"><strong>Answer:</strong> <span id="intOutput"></span></div>
-        <div class="bg-orange-100 rounded-xl p-3 mt-2"><strong>Steps:</strong> <span id="intSteps"></span></div>
+    <!-- Integration (advanced) -->
+    <section class="section" id="intSection">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">∫ Integration (indefinite & definite)</h2>
+        <div class="small">Enter integrand and optionally limits a,b (for definite integrals)</div>
+      </div>
+
+      <div class="io">
+        <div style="flex:1" class="card">
+          <label class="small">Integrand (variable x):</label>
+          <input id="intExpr" placeholder="e.g. x^2 * e^(x)" style="width:100%" />
+          <div class="mt-2 flex gap-2 items-center">
+            <input id="intA" placeholder="lower limit (leave blank for indefinite)" style="width:160px" />
+            <input id="intB" placeholder="upper limit (leave blank for indefinite)" style="width:160px" />
+            <button class="btn" style="background:linear-gradient(90deg,var(--p5),var(--p4))" onclick="doIntegrate()">Integrate</button>
+          </div>
+        </div>
+
+        <div style="width:360px" class="card">
+          <div><strong>Answer</strong></div>
+          <div id="intAnswer" class="mt-2 small">—</div>
+          <hr class="my-2" />
+          <div><strong>Steps</strong></div>
+          <pre id="intSteps" class="mt-2 small">—</pre>
+        </div>
       </div>
     </section>
 
-    <!-- Quadratic Equation -->
-    <section class="yellow/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">🟣 Quadratic Equation</h2>
-      <input id="quadA" type="number" placeholder="a" class="p-2 border rounded w-20"/> 
-      <input id="quadB" type="number" placeholder="b" class="p-2 border rounded w-20"/> 
-      <input id="quadC" type="number" placeholder="c" class="p-2 border rounded w-20"/>
-      <button onclick="quadratic()" class="ml-2 px-4 py-2 bg-purple-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-purple-100 rounded-xl p-3"><strong>Roots:</strong> <span id="quadOutput"></span></div>
+    <!-- Quadratic (robust) -->
+    <section class="section" id="quadSection">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">🟣 Quadratic (all cases)</h2>
+        <div class="small">Handles real, repeated, and complex roots; shows formula steps</div>
+      </div>
+
+      <div class="io">
+        <div class="card" style="flex:1">
+          <label class="small">Either provide coefficients a,b,c OR full expression:</label>
+          <div class="mt-2 flex gap-2">
+            <input id="qa" placeholder="a" style="width:70px" />
+            <input id="qb" placeholder="b" style="width:70px" />
+            <input id="qc" placeholder="c" style="width:70px" />
+            <input id="qexpr" placeholder="or full expression like x^2-5x+6" style="flex:1" />
+            <button class="btn" onclick="doQuadratic()">Solve</button>
+          </div>
+        </div>
+
+        <div style="width:360px" class="card">
+          <div><strong>Roots</strong></div>
+          <div id="quadAnswer" class="mt-2 small">—</div>
+          <hr class="my-2" />
+          <div><strong>Steps</strong></div>
+          <pre id="quadSteps" class="mt-2 small">—</pre>
+        </div>
+      </div>
     </section>
 
     <!-- Partial Fractions -->
-    <section class="bg-orange/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">🍰 Partial Fractions</h2>
-      <input id="pfInput" type="text" placeholder="(x+1)/(x^2+3x+2)" class="mt-2 p-2 w-full border rounded-xl"/>
-      <button onclick="partialFraction()" class="mt-3 px-4 py-2 bg-pink-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-pink-100 rounded-xl p-3"><strong>Decomposition:</strong> <span id="pfOutput"></span></div>
+    <section class="section" id="pfSection">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">🍰 Partial Fractions</h2>
+        <div class="small">Rational decomposition (show factorization and apart())</div>
+      </div>
+
+      <div class="io">
+        <div class="card" style="flex:1">
+          <label class="small">Rational expression (in x):</label>
+          <input id="pfExpr" placeholder="(x^2+1)/(x^3-x)" style="width:100%" />
+          <div class="mt-2"><button class="btn" onclick="doPartial()">Decompose</button></div>
+        </div>
+        <div style="width:360px" class="card">
+          <div><strong>Decomposition</strong></div>
+          <div id="pfAnswer" class="mt-2 small">—</div>
+          <hr class="my-2" />
+          <div><strong>Steps</strong></div>
+          <pre id="pfSteps" class="mt-2 small">—</pre>
+        </div>
+      </div>
     </section>
 
-    <!-- Probability -->
-    <section class="bg-purple/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">🎲 Probability</h2>
-      <input id="probFavourable" type="number" placeholder="Favourable" class="p-2 border rounded w-24"/>
-      <input id="probTotal" type="number" placeholder="Total" class="p-2 border rounded w-24"/>
-      <button onclick="probability()" class="ml-2 px-4 py-2 bg-yellow-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-yellow-100 rounded-xl p-3"><strong>P(E):</strong> <span id="probOutput"></span></div>
+    <!-- Geometry (many shapes) -->
+    <section class="section" id="geoSection">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">🔺 Geometry (many shapes)</h2>
+        <div class="small">Circle, rectangle, square, triangle, trapezoid, parallelogram, ellipse</div>
+      </div>
+
+      <div class="io">
+        <div class="card" style="flex:1">
+          <label class="small">Choose shape</label>
+          <select id="geoShape" style="width:100%">
+            <option value="circle">Circle (r)</option>
+            <option value="rectangle">Rectangle (l,w)</option>
+            <option value="square">Square (side)</option>
+            <option value="triangle">Triangle (base,height) or (a,b,c)</option>
+            <option value="trapezoid">Trapezoid (a,b,height)</option>
+            <option value="parallelogram">Parallelogram (base,height)</option>
+            <option value="ellipse">Ellipse (a,b)</option>
+          </select>
+
+          <div id="geoInputs" class="mt-3 space-y-2">
+            <!-- dynamic inputs inserted here -->
+          </div>
+
+          <div class="mt-2">
+            <button class="btn" onclick="computeGeometry()">Compute</button>
+            <button class="btn" onclick="fillGeoExample()" style="background:linear-gradient(90deg,var(--p2),var(--p1));margin-left:8px">Example</button>
+          </div>
+        </div>
+
+        <div style="width:360px" class="card">
+          <div><strong>Result</strong></div>
+          <div id="geoAnswer" class="mt-2 small">—</div>
+          <hr class="my-2" />
+          <div><strong>Steps</strong></div>
+          <pre id="geoSteps" class="mt-2 small">—</pre>
+        </div>
+      </div>
     </section>
 
-    <!-- Statistics -->
-    <section class="bg-grey/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">📊 Statistics</h2>
-      <input id="statsInput" type="text" placeholder="e.g. 2,4,6,8,10" class="mt-2 p-2 w-full border rounded-xl"/>
-      <button onclick="statistics()" class="mt-3 px-4 py-2 bg-green-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-green-100 rounded-xl p-3"><strong>Result:</strong> <span id="statsOutput"></span></div>
+    <!-- Work problems (comprehensive) -->
+    <section class="section" id="workSection">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">⏳ Work & Time Problems</h2>
+        <div class="small">Single, combined, inverse, unknown rate problems</div>
+      </div>
+
+      <div class="io">
+        <div class="card" style="flex:1">
+          <label class="small">Describe problem (we accept formats):</label>
+          <textarea id="workText" placeholder="Examples:
+- A does job in 3 days, B in 6 days -> together?
+- A finishes alone in 5 days; A+B finish in 3 days -> find B's time
+- Worker rates: A:2 units/day; B:3 units/day; total work 10 units -> time?" style="width:100%;min-height:110px"></textarea>
+          <div class="mt-2">
+            <button class="btn" onclick="solveWork()">Solve</button>
+            <button class="btn" onclick="workExample()" style="background:linear-gradient(90deg,var(--p4),var(--p3));margin-left:8px">Example</button>
+          </div>
+        </div>
+
+        <div style="width:360px" class="card">
+          <div><strong>Answer</strong></div>
+          <div id="workAnswer" class="mt-2 small">—</div>
+          <hr class="my-2" />
+          <div><strong>Steps</strong></div>
+          <pre id="workSteps" class="mt-2 small">—</pre>
+        </div>
+      </div>
     </section>
 
-    <!-- Percentage -->
-    <section class="bg-lightbrown/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">% Percentage</h2>
-      <input id="perPart" type="number" placeholder="Part" class="p-2 border rounded w-24"/>
-      <input id="perTotal" type="number" placeholder="Total" class="p-2 border rounded w-24"/>
-      <button onclick="percentage()" class="ml-2 px-4 py-2 bg-orange-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-orange-100 rounded-xl p-3"><strong>Percentage:</strong> <span id="perOutput"></span></div>
+    <!-- Conics (robust identification + solve) -->
+    <section class="section" id="conicSection">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">🌀 Conic Sections (identify & analyze)</h2>
+        <div class="small">General second-degree form: Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0</div>
+      </div>
+
+      <div class="io">
+        <div class="card" style="flex:1">
+          <label class="small">Enter full equation (use x and y)</label>
+          <input id="conicExpr" placeholder="e.g. 4x^2 + 0xy + 9y^2 - 36 = 0" style="width:100%" />
+          <div class="mt-2">
+            <button class="btn" onclick="analyzeConic()">Analyze</button>
+            <button class="btn" onclick="conicExample()" style="background:linear-gradient(90deg,var(--p2),var(--p5));margin-left:8px">Example</button>
+          </div>
+        </div>
+
+        <div style="width:360px" class="card">
+          <div><strong>Type</strong></div>
+          <div id="conicType" class="mt-2 small">—</div>
+          <hr class="my-2" />
+          <div><strong>Steps / notes</strong></div>
+          <pre id="conicSteps" class="mt-2 small">—</pre>
+        </div>
+      </div>
     </section>
 
-    <!-- Work -->
-    <section class="bg-darkpink/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">⏳ Work Problems</h2>
-      <input id="workA" type="number" placeholder="Days (A)" class="p-2 border rounded w-24"/>
-      <input id="workB" type="number" placeholder="Days (B)" class="p-2 border rounded w-24"/>
-      <button onclick="workProblem()" class="ml-2 px-4 py-2 bg-blue-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-blue-100 rounded-xl p-3"><strong>Together:</strong> <span id="workOutput"></span></div>
-    </section>
+    <footer class="small text-center mt-4">© <span id="year"></span> Caffeinated Tutor — Syeda Manahil ☕</footer>
+  </div>
 
-    <!-- Geometry -->
-    <section class="bg-white/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">🔺 Geometry (Rectangle)</h2>
-      <input id="geoL" type="number" placeholder="Length" class="p-2 border rounded w-24"/>
-      <input id="geoW" type="number" placeholder="Width" class="p-2 border rounded w-24"/>
-      <button onclick="geometry()" class="ml-2 px-4 py-2 bg-pink-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-pink-100 rounded-xl p-3"><strong>Result:</strong> <span id="geoOutput"></span></div>
-    </section>
-
-    <!-- Vectors -->
-    <section class="bg-blue/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">🧭 Vectors</h2>
-      <input id="vecA" type="text" placeholder="e.g. 1,2,3" class="p-2 border rounded w-32"/>
-      <input id="vecB" type="text" placeholder="e.g. 4,5,6" class="p-2 border rounded w-32"/>
-      <button onclick="vectors()" class="ml-2 px-4 py-2 bg-purple-300 rounded-xl">Solve</button>
-      <div class="mt-4 bg-purple-100 rounded-xl p-3"><strong>Dot/Cross:</strong> <span id="vecOutput"></span></div>
-    </section>
-
-    <!-- Conics -->
-    <section class="bg-beige/70 rounded-2xl shadow-md p-6">
-      <h2 class="text-xl font-semibold">🌀 Conic Section (Circle check)</h2>
-      <input id="circleX" type="number" placeholder="x^2 coeff" class="p-2 border rounded w-32"/>
-      <input id="circleY" type="number" placeholder="y^2 coeff" class="p-2 border rounded w-32"/>
-      <button onclick="conic()" class="ml-2 px-4 py-2 bg-green-300 rounded-xl">Check</button>
-      <div class="mt-4 bg-green-100 rounded-xl p-3"><strong>Type:</strong> <span id="conicOutput"></span></div>
-    </section>
-
-  </main>
-
-  <!-- JS Logic -->
   <script>
-    function renderMath() { MathJax.typesetPromise(); }
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-    function differentiate() {
-      let input = document.getElementById("diffInput").value;
-      let result = Algebrite.diff(input, "x").toString();
-      document.getElementById("diffOutput").innerHTML = "$" + result + "$";
-      document.getElementById("diffSteps").innerHTML = "Derivative of $" + input + "$ using power rule.";
-      renderMath();
+    // ---------- UTIL helpers ----------
+    function safeEvalAlgebrite(expr){ // return Algebrite string result (best-effort)
+      try{ return Algebrite.run(expr).toString(); }catch(e){ return 'Error: ' + e.message; }
+    }
+    function renderMathIn(el){ MathJax.typesetPromise([el]); }
+
+    // ---------- DIFFERENTIATION ----------
+    function doDifferentiate(){
+      const expr = (document.getElementById('diffExpr').value || '').trim();
+      if(!expr){ alert('Enter expression'); return; }
+      const orderRaw = document.getElementById('diffOrder').value.trim();
+      const order = orderRaw ? Math.max(1, parseInt(orderRaw)||1) : 1;
+      const at = document.getElementById('diffAt').value.trim();
+      try{
+        // symbolic differentiate using repeated d()
+        let res = expr;
+        for(let i=0;i<order;i++){ res = safeEvalAlgebrite('d(' + res + ', x)'); }
+        // simplified form
+        const simplified = safeEvalAlgebrite('simplify(' + res + ')');
+        let answerText = '$' + simplified + '$';
+        if(at){
+          // evaluate numeric
+          const valExpr = simplified + '.subs(x,' + at + ')';
+          const numeric = Algebrite.run('eval(' + valExpr + ')');
+          answerText += ' , evaluated at x=' + at + ' → ' + numeric;
+        }
+        document.getElementById('diffAnswer').innerHTML = answerText;
+        document.getElementById('diffSteps').textContent = 
+          `1) Given: ${expr}\n2) Order: ${order}\n3) Repeated differentiation via Algebrite\n4) Raw result: ${res}\n5) Simplified: ${simplified}`;
+        renderMathIn(document.getElementById('diffAnswer'));
+      }catch(e){ document.getElementById('diffAnswer').textContent = 'Error: '+e.message; }
     }
 
-    function integrate() {
-      let input = document.getElementById("intInput").value;
-      let result = Algebrite.integral(input, "x").toString();
-      document.getElementById("intOutput").innerHTML = "$" + result + " + C$";
-      document.getElementById("intSteps").innerHTML = "Integrated each term of $" + input + "$.";
-      renderMath();
+    // ---------- INTEGRATION ----------
+    function doIntegrate(){
+      const expr = (document.getElementById('intExpr').value || '').trim();
+      if(!expr){ alert('Enter integrand'); return; }
+      const a = document.getElementById('intA').value.trim();
+      const b = document.getElementById('intB').value.trim();
+      try{
+        const integral = safeEvalAlgebrite('integral(' + expr + ', x)');
+        const simplified = safeEvalAlgebrite('simplify(' + integral + ')');
+        let answerText = '$' + simplified + ' + C$';
+        let steps = `1) Given: ${expr}\n2) Compute indefinite integral: ${integral}\n3) Simplify: ${simplified}\n4) Add +C for indefinite integrals.`;
+        if(a !== '' && b !== ''){
+          // definite integral: evaluate by substituting
+          const valA = Algebrite.run('eval(' + simplified + '.subs(x,' + a + '))').toString();
+          const valB = Algebrite.run('eval(' + simplified + '.subs(x,' + b + '))').toString();
+          // Some Algebrite returns symbolic; try numeric if possible
+          const numeric = (function(){
+            try{ return math.format( math.evaluate(valB) - math.evaluate(valA), {precision:14} ); }catch(e){ return (valB + ' - ' + valA); }
+          })();
+          answerText = `Definite integral from ${a} to ${b}: ${numeric}`;
+          steps += `\n5) Evaluate at upper: ${valB}\n6) Evaluate at lower: ${valA}\n7) Subtract: ${numeric}`;
+        }
+        document.getElementById('intAnswer').innerHTML = answerText;
+        document.getElementById('intSteps').textContent = steps;
+        renderMathIn(document.getElementById('intAnswer'));
+      }catch(e){ document.getElementById('intAnswer').textContent = 'Error: '+e.message; }
     }
 
-    function quadratic() {
-      let a = parseFloat(document.getElementById("quadA").value);
-      let b = parseFloat(document.getElementById("quadB").value);
-      let c = parseFloat(document.getElementById("quadC").value);
-      let d = b*b - 4*a*c;
-      if (d < 0) document.getElementById("quadOutput").innerHTML = "No Real Roots";
-      else {
-        let r1 = (-b + Math.sqrt(d)) / (2*a);
-        let r2 = (-b - Math.sqrt(d)) / (2*a);
-        document.getElementById("quadOutput").innerHTML = "x = " + r1 + ", " + r2;
-      }
+    // ---------- QUADRATIC ----------
+    function doQuadratic(){
+      let a = document.getElementById('qa').value.trim();
+      let b = document.getElementById('qb').value.trim();
+      let c = document.getElementById('qc').value.trim();
+      const expr = document.getElementById('qexpr').value.trim();
+      try{
+        if(expr && (!a && !b && !c)){
+          // try to parse coefficients from expression using Algebrite
+          const poly = safeEvalAlgebrite('expand(' + expr + ')');
+          a = parseFloat(Algebrite.run('coeff(' + poly + ', x, 2)')) || 0;
+          b = parseFloat(Algebrite.run('coeff(' + poly + ', x, 1)')) || 0;
+          c = parseFloat(Algebrite.run('coeff(' + poly + ', x, 0)')) || 0;
+        }else{
+          a = parseFloat(a) || 0; b = parseFloat(b) || 0; c = parseFloat(c) || 0;
+        }
+        if(a === 0){ document.getElementById('quadAnswer').textContent = 'Not a quadratic (a=0)'; return; }
+        const disc = b*b - 4*a*c;
+        let r1, r2;
+        if(disc >= 0){
+          r1 = (-b + Math.sqrt(disc)) / (2*a);
+          r2 = (-b - Math.sqrt(disc)) / (2*a);
+        } else {
+          // complex roots
+          const re = (-b/(2*a)).toFixed(6);
+          const im = (Math.sqrt(Math.abs(disc)) / (2*a)).toFixed(6);
+          r1 = `${re} + ${im}i`; r2 = `${re} - ${im}i`;
+        }
+        document.getElementById('quadAnswer').textContent = `Roots: ${r1} , ${r2}`;
+        document.getElementById('quadSteps').textContent = `1) coefficients: a=${a}, b=${b}, c=${c}\n2) Discriminant D = b^2 - 4ac = ${disc}\n3) Roots via formula x = (-b ± sqrt(D)) / (2a)\n4) Computed roots: ${r1} , ${r2}`;
+      }catch(e){ document.getElementById('quadAnswer').textContent = 'Error: '+e.message; }
     }
 
-    function partialFraction() {
-      let expr = document.getElementById("pfInput").value;
-      let result = Algebrite.apart(expr).toString();
-      document.getElementById("pfOutput").innerHTML = result;
-      renderMath();
+    // ---------- PARTIAL FRACTIONS ----------
+    function doPartial(){
+      const expr = (document.getElementById('pfExpr').value || '').trim();
+      if(!expr){ alert('Enter rational expression'); return; }
+      try{
+        const apart = safeEvalAlgebrite('apart(' + expr + ', x)');
+        const num = safeEvalAlgebrite('factor(numerator(' + expr + '))');
+        const den = safeEvalAlgebrite('factor(denominator(' + expr + '))');
+        document.getElementById('pfAnswer').textContent = apart;
+        document.getElementById('pfSteps').textContent = `1) Expression: ${expr}\n2) Factor numerator: ${num}\n3) Factor denominator: ${den}\n4) Decompose (apart): ${apart}`;
+        renderMathIn(document.getElementById('pfAnswer'));
+      }catch(e){ document.getElementById('pfAnswer').textContent='Error: '+e.message; }
     }
 
-    function probability() {
-      let f = parseFloat(document.getElementById("probFavourable").value);
-      let t = parseFloat(document.getElementById("probTotal").value);
-      document.getElementById("probOutput").innerHTML = (f/t).toFixed(3);
+    // ---------- GEOMETRY ----------
+    const geoShapes = {
+      circle: ()=>`<input id="geo_r" placeholder="radius r" class="p-2 border rounded" />`,
+      rectangle: ()=>`<input id="geo_l" placeholder="length" class="p-2 border rounded" /> <input id="geo_w" placeholder="width" class="p-2 border rounded" />`,
+      square: ()=>`<input id="geo_s" placeholder="side" class="p-2 border rounded" />`,
+      triangle: ()=>`<input id="geo_b" placeholder="base" class="p-2 border rounded" /> <input id="geo_h" placeholder="height" class="p-2 border rounded" /> <br/><small class="small">or enter sides a,b,c as: a,b,c in single input geo_triangle_sides</small><br/><input id="geo_triangle_sides" placeholder="e.g. 3,4,5" class="p-2 border rounded" />`,
+      trapezoid: ()=>`<input id="geo_a" placeholder="base a" class="p-2 border rounded" /> <input id="geo_b2" placeholder="base b" class="p-2 border rounded" /> <input id="geo_h2" placeholder="height" class="p-2 border rounded" />`,
+      parallelogram: ()=>`<input id="geo_base" placeholder="base" class="p-2 border rounded" /> <input id="geo_height" placeholder="height" class="p-2 border rounded" />`,
+      ellipse: ()=>`<input id="geo_a2" placeholder="semi-major a" class="p-2 border rounded" /> <input id="geo_b2e" placeholder="semi-minor b" class="p-2 border rounded" />`
+    };
+    document.getElementById('geoShape').addEventListener('change', updateGeoInputs);
+    function updateGeoInputs(){ document.getElementById('geoInputs').innerHTML = geoShapes[document.getElementById('geoShape').value](); }
+    updateGeoInputs();
+
+    function fillGeoExample(){
+      document.getElementById('geoShape').value='rectangle';
+      updateGeoInputs();
+      document.getElementById('geo_l').value=5; document.getElementById('geo_w').value=3;
     }
 
-    function statistics() {
-      let arr = document.getElementById("statsInput").value.split(",").map(Number);
-      let mean = math.mean(arr), median = math.median(arr), mode = math.mode(arr);
-      document.getElementById("statsOutput").innerHTML = "Mean=" + mean + ", Median=" + median + ", Mode=" + mode;
+    function computeGeometry(){
+      const shape = document.getElementById('geoShape').value;
+      let ans='', steps='';
+      try{
+        if(shape==='circle'){
+          const r = parseFloat(document.getElementById('geo_r').value);
+          const area = Math.PI * r * r; const per = 2*Math.PI*r;
+          ans = `Area = ${area.toFixed(4)}, Circumference = ${per.toFixed(4)}`;
+          steps = `Area = π r^2 = π * ${r}^2 = ${area}\nCircumference = 2πr = ${per}`;
+        } else if(shape==='rectangle'){
+          const l = parseFloat(document.getElementById('geo_l').value);
+          const w = parseFloat(document.getElementById('geo_w').value);
+          const area = l*w; const per = 2*(l+w);
+          ans = `Area=${area}, Perimeter=${per}`;
+          steps = `Area = l*w = ${l}*${w} = ${area}\nPerimeter = 2(l+w) = ${per}`;
+        } else if(shape==='square'){
+          const s = parseFloat(document.getElementById('geo_s').value);
+          ans = `Area = ${s*s}, Perimeter = ${4*s}`;
+          steps = `Area = side^2 = ${s}^2 = ${s*s}\nPerimeter = 4*side = ${4*s}`;
+        } else if(shape==='triangle'){
+          const sides = (document.getElementById('geo_triangle_sides').value || '').trim();
+          if(sides){
+            const arr = sides.split(',').map(Number);
+            if(arr.length===3){ const [a,b,c]=arr; const s=(a+b+c)/2; const area=Math.sqrt(s*(s-a)*(s-b)*(s-c)); ans=`Area=${area.toFixed(4)}`, steps=`Using Heron's formula: s=${s}, Area = sqrt(s(s-a)(s-b)(s-c)) = ${area}`; }
+            else ans='Provide 3 sides as a,b,c';
+          } else {
+            const base = parseFloat(document.getElementById('geo_b').value);
+            const height = parseFloat(document.getElementById('geo_h').value);
+            const area = 0.5 * base * height;
+            ans = `Area = ${area}`;
+            steps = `Area = 1/2 * base * height = 1/2 * ${base} * ${height} = ${area}`;
+          }
+        } else if(shape==='trapezoid'){
+          const a = parseFloat(document.getElementById('geo_a').value);
+          const b = parseFloat(document.getElementById('geo_b2').value);
+          const h = parseFloat(document.getElementById('geo_h2').value);
+          const area = 0.5*(a+b)*h;
+          ans = `Area = ${area}`;
+          steps = `Area = (a+b)/2 * h = (${a}+${b})/2 * ${h} = ${area}`;
+        } else if(shape==='parallelogram'){
+          const base = parseFloat(document.getElementById('geo_base').value);
+          const h = parseFloat(document.getElementById('geo_height').value);
+          const area = base*h;
+          ans = `Area = ${area}`;
+          steps = `Area = base * height = ${base} * ${h} = ${area}`;
+        } else if(shape==='ellipse'){
+          const a = parseFloat(document.getElementById('geo_a2').value);
+          const b = parseFloat(document.getElementById('geo_b2e').value);
+          const area = Math.PI * a * b;
+          ans = `Area = ${area.toFixed(4)}`;
+          steps = `Area = π a b = π * ${a} * ${b} = ${area}`;
+        }
+        document.getElementById('geoAnswer').textContent = ans;
+        document.getElementById('geoSteps').textContent = steps || '—';
+      }catch(e){ document.getElementById('geoAnswer').textContent = 'Error: '+e.message; }
     }
 
-    function percentage() {
-      let part = parseFloat(document.getElementById("perPart").value);
-      let total = parseFloat(document.getElementById("perTotal").value);
-      document.getElementById("perOutput").innerHTML = ((part/total)*100).toFixed(2) + "%";
+    // ---------- WORK PROBLEMS ----------
+    function workExample(){
+      document.getElementById('workText').value = 'A does job in 5 days, B in 10 days. How long together?';
     }
 
-    function workProblem() {
-      let A = parseFloat(document.getElementById("workA").value);
-      let B = parseFloat(document.getElementById("workB").value);
-      let together = 1 / (1/A + 1/B);
-      document.getElementById("workOutput").innerHTML = together.toFixed(2) + " days";
+    function solveWork(){
+      const text = document.getElementById('workText').value.toLowerCase();
+      const ansEl = document.getElementById('workAnswer'); const stepsEl = document.getElementById('workSteps');
+      try{
+        // simple patterns:
+        // "a does job in X days, b in Y days" -> together = 1/(1/X + 1/Y)
+        let m = text.match(/a.*?(\d+\.?\d*).*?days.*?b.*?(\d+\.?\d*)/i);
+        if(!m) m = text.match(/(\d+\.?\d*).*?days.*?and.*?(\d+\.?\d*).*?days/i);
+        if(m){
+          const A = parseFloat(m[1]), B = parseFloat(m[2]);
+          const rateA = 1/A, rateB = 1/B;
+          const together = 1 / (rateA + rateB);
+          ansEl.textContent = `${together.toFixed(4)} days`;
+          stepsEl.textContent = `Rate A = 1/${A} per day, Rate B = 1/${B} per day\nCombined rate = ${rateA} + ${rateB} = ${(rateA+rateB).toFixed(6)}\nTime = 1 / combined rate = ${together}`;
+          return;
+        }
+        // "A alone in X days; A+B in Y days -> find B"
+        m = text.match(/a.*?(\d+\.?\d*).*?days.*?a\+b.*?(\d+\.?\d*).*?days/i);
+        if(m){
+          const A = parseFloat(m[1]), AB = parseFloat(m[2]);
+          const rateA = 1/A;
+          const rateAB = 1/AB;
+          const rateB = rateAB - rateA;
+          const B = 1 / rateB;
+          ansEl.textContent = `B takes ${B.toFixed(4)} days alone`;
+          stepsEl.textContent = `Rate A = 1/${A}\nRate A+B = 1/${AB}\nRate B = rateAB - rateA = ${rateB}\nSo B = 1/rateB = ${B}`;
+          return;
+        }
+        // "rates given as units/day" -> compute time for particular work
+        m = text.match(/a.*?([0-9]+(?:\.[0-9]+)?)\s*units\/day.*?b.*?([0-9]+(?:\.[0-9]+)?)\s*units\/day.*?work\s*([0-9]+(?:\.[0-9]+)?)/i);
+        if(m){
+          const rA = parseFloat(m[1]), rB = parseFloat(m[2]), work = parseFloat(m[3]);
+          const time = work / (rA + rB);
+          ansEl.textContent = `${time.toFixed(4)} time units`;
+          stepsEl.textContent = `Combined rate = ${rA} + ${rB} = ${rA+rB}\nTime = work / rate = ${work} / ${rA+rB} = ${time}`;
+          return;
+        }
+        // fallback: try to parse like "A in 3 days, B in 6" generically
+        m = text.match(/(\d+\.?\d*).*?days.*?(\d+\.?\d*).*?days/);
+        if(m){
+          const A = parseFloat(m[1]), B = parseFloat(m[2]);
+          const together = 1/(1/A + 1/B);
+          ansEl.textContent = `${together.toFixed(4)} days`;
+          stepsEl.textContent = `Assumed A=${A}, B=${B} days -> combined = ${together}`;
+          return;
+        }
+        ansEl.textContent = 'Unable to parse problem. Try formats: "A does job in X days, B in Y days", or "A alone in X; A+B in Y"';
+        stepsEl.textContent = 'Examples supported shown in input placeholder.';
+      }catch(e){ ansEl.textContent = 'Error: '+e.message; stepsEl.textContent = ''; }
     }
 
-    function geometry() {
-      let l = parseFloat(document.getElementById("geoL").value);
-      let w = parseFloat(document.getElementById("geoW").value);
-      let area = l*w, peri = 2*(l+w);
-      document.getElementById("geoOutput").innerHTML = "Area=" + area + ", Perimeter=" + peri;
+    // ---------- CONIC ANALYSIS ----------
+    function conicExample(){ document.getElementById('conicExpr').value = '4*x^2 + 0*x*y + 9*y^2 - 36 = 0'; }
+    function analyzeConic(){
+      const expr = (document.getElementById('conicExpr').value || '').trim();
+      if(!expr){ alert('Enter general conic equation'); return; }
+      // Try to extract coefficients A,B,C,D,E,F for Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
+      try{
+        // normalize: replace ^ with ^ for Algebrite and use expand
+        const eq = Algebrite.run('expand(' + expr + ')');
+        // Algebrite coeffs
+        const A = parseFloat(Algebrite.run('coeff(' + eq + ', x, 2)')) || 0;
+        const B = parseFloat(Algebrite.run('coeff(' + eq + ', x, 1, y, 1)')) || 0; // attempt b as coeff of xy
+        const C = parseFloat(Algebrite.run('coeff(' + eq + ', y, 2)')) || 0;
+        // linear terms
+        const D = parseFloat(Algebrite.run('coeff(' + eq + ', x, 1)')) || 0;
+        const E = parseFloat(Algebrite.run('coeff(' + eq + ', y, 1)')) || 0;
+        // constant
+        const F = parseFloat(Algebrite.run('coeff(' + eq + ', x, 0)')) || 0;
+        // discriminant for conic: B^2 - 4AC
+        const disc = B*B - 4*A*C;
+        let type = '';
+        if(Math.abs(B) < 1e-9 && Math.abs(A - C) < 1e-9 && A !== 0) type = 'Circle (A=C, B=0)';
+        else if(disc < 0) type = 'Ellipse (or circle if A=C)';
+        else if(disc === 0) type = 'Parabola';
+        else if(disc > 0) type = 'Hyperbola';
+        const steps = `Extracted coefficients: A=${A}, B=${B}, C=${C}, D=${D}, E=${E}, F=${F}\nDiscriminant (B^2 - 4AC) = ${disc}\nConic type based on sign of discriminant.`;
+        document.getElementById('conicType').textContent = type;
+        document.getElementById('conicSteps').textContent = steps;
+      }catch(e){ document.getElementById('conicType').textContent = 'Error: '+e.message; document.getElementById('conicSteps').textContent=''; }
     }
 
-    function vectors() {
-      let A = document.getElementById("vecA").value.split(",").map(Number);
-      let B = document.getElementById("vecB").value.split(",").map(Number);
-      let dot = math.dot(A,B);
-      let cross = math.cross(A,B);
-      document.getElementById("vecOutput").innerHTML = "Dot=" + dot + ", Cross=[" + cross + "]";
-    }
+    // ---------- EXTRA: attach change listeners for nice UX ----------
+    // (already added for geo select)
 
-    function conic() {
-      let x = parseFloat(document.getElementById("circleX").value);
-      let y = parseFloat(document.getElementById("circleY").value);
-      document.getElementById("conicOutput").innerHTML = (x === y) ? "Circle" : "Ellipse/Other";
-    }
+    // ---------- finishing ----------
+    // initial setup
+    updateGeoInputs();
   </script>
-
 </body>
 </html>
