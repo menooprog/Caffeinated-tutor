@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caffeinated Tutor ☕</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Math.js & Algebrite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.4.0/algebrite.min.js"></script>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #fde2e4, #cdb4db, #fff1c1, #caffbf, #ffd6a5);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+    @keyframes gradient {
+      0% {background-position:0% 50%;}
+      50% {background-position:100% 50%;}
+      100% {background-position:0% 50%;}
+    }
+  </style>
+</head>
+<body class="font-sans text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-pink-200 shadow-md p-4 sticky top-0 z-50 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">☕ Caffeinated Tutor</h1>
+    <span class="italic">Created by Syeda Manahil 💖</span>
+  </header>
+
+  <!-- Main -->
+  <main class="space-y-10 p-6">
+
+    <!-- Differentiation -->
+    <section class="bg-white/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">🔺 Differentiation</h2>
+      <input id="diffInput" type="text" placeholder="e.g. x^3 + 2x" class="mt-2 p-2 w-full border rounded-xl"/>
+      <button onclick="differentiate()" class="mt-3 px-4 py-2 bg-pink-300 rounded-xl">Solve</button>
+      <div class="mt-4">
+        <div class="bg-pink-100 rounded-xl p-3"><strong>Answer:</strong> <span id="diffOutput"></span></div>
+        <div class="bg-yellow-100 rounded-xl p-3 mt-2"><strong>Steps:</strong> <span id="diffSteps"></span></div>
+      </div>
+    </section>
+
+    <!-- Integration -->
+    <section class="bg-pink/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">∫ Integration</h2>
+      <input id="intInput" type="text" placeholder="e.g. x^2" class="mt-2 p-2 w-full border rounded-xl"/>
+      <button onclick="integrate()" class="mt-3 px-4 py-2 bg-lime-300 rounded-xl">Solve</button>
+      <div class="mt-4">
+        <div class="bg-green-100 rounded-xl p-3"><strong>Answer:</strong> <span id="intOutput"></span></div>
+        <div class="bg-orange-100 rounded-xl p-3 mt-2"><strong>Steps:</strong> <span id="intSteps"></span></div>
+      </div>
+    </section>
+
+    <!-- Quadratic Equation -->
+    <section class="yellow/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">🟣 Quadratic Equation</h2>
+      <input id="quadA" type="number" placeholder="a" class="p-2 border rounded w-20"/> 
+      <input id="quadB" type="number" placeholder="b" class="p-2 border rounded w-20"/> 
+      <input id="quadC" type="number" placeholder="c" class="p-2 border rounded w-20"/>
+      <button onclick="quadratic()" class="ml-2 px-4 py-2 bg-purple-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-purple-100 rounded-xl p-3"><strong>Roots:</strong> <span id="quadOutput"></span></div>
+    </section>
+
+    <!-- Partial Fractions -->
+    <section class="bg-orange/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">🍰 Partial Fractions</h2>
+      <input id="pfInput" type="text" placeholder="(x+1)/(x^2+3x+2)" class="mt-2 p-2 w-full border rounded-xl"/>
+      <button onclick="partialFraction()" class="mt-3 px-4 py-2 bg-pink-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-pink-100 rounded-xl p-3"><strong>Decomposition:</strong> <span id="pfOutput"></span></div>
+    </section>
+
+    <!-- Probability -->
+    <section class="bg-purple/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">🎲 Probability</h2>
+      <input id="probFavourable" type="number" placeholder="Favourable" class="p-2 border rounded w-24"/>
+      <input id="probTotal" type="number" placeholder="Total" class="p-2 border rounded w-24"/>
+      <button onclick="probability()" class="ml-2 px-4 py-2 bg-yellow-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-yellow-100 rounded-xl p-3"><strong>P(E):</strong> <span id="probOutput"></span></div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="bg-grey/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">📊 Statistics</h2>
+      <input id="statsInput" type="text" placeholder="e.g. 2,4,6,8,10" class="mt-2 p-2 w-full border rounded-xl"/>
+      <button onclick="statistics()" class="mt-3 px-4 py-2 bg-green-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-green-100 rounded-xl p-3"><strong>Result:</strong> <span id="statsOutput"></span></div>
+    </section>
+
+    <!-- Percentage -->
+    <section class="bg-lightbrown/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">% Percentage</h2>
+      <input id="perPart" type="number" placeholder="Part" class="p-2 border rounded w-24"/>
+      <input id="perTotal" type="number" placeholder="Total" class="p-2 border rounded w-24"/>
+      <button onclick="percentage()" class="ml-2 px-4 py-2 bg-orange-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-orange-100 rounded-xl p-3"><strong>Percentage:</strong> <span id="perOutput"></span></div>
+    </section>
+
+    <!-- Work -->
+    <section class="bg-darkpink/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">⏳ Work Problems</h2>
+      <input id="workA" type="number" placeholder="Days (A)" class="p-2 border rounded w-24"/>
+      <input id="workB" type="number" placeholder="Days (B)" class="p-2 border rounded w-24"/>
+      <button onclick="workProblem()" class="ml-2 px-4 py-2 bg-blue-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-blue-100 rounded-xl p-3"><strong>Together:</strong> <span id="workOutput"></span></div>
+    </section>
+
+    <!-- Geometry -->
+    <section class="bg-white/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">🔺 Geometry (Rectangle)</h2>
+      <input id="geoL" type="number" placeholder="Length" class="p-2 border rounded w-24"/>
+      <input id="geoW" type="number" placeholder="Width" class="p-2 border rounded w-24"/>
+      <button onclick="geometry()" class="ml-2 px-4 py-2 bg-pink-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-pink-100 rounded-xl p-3"><strong>Result:</strong> <span id="geoOutput"></span></div>
+    </section>
+
+    <!-- Vectors -->
+    <section class="bg-blue/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">🧭 Vectors</h2>
+      <input id="vecA" type="text" placeholder="e.g. 1,2,3" class="p-2 border rounded w-32"/>
+      <input id="vecB" type="text" placeholder="e.g. 4,5,6" class="p-2 border rounded w-32"/>
+      <button onclick="vectors()" class="ml-2 px-4 py-2 bg-purple-300 rounded-xl">Solve</button>
+      <div class="mt-4 bg-purple-100 rounded-xl p-3"><strong>Dot/Cross:</strong> <span id="vecOutput"></span></div>
+    </section>
+
+    <!-- Conics -->
+    <section class="bg-beige/70 rounded-2xl shadow-md p-6">
+      <h2 class="text-xl font-semibold">🌀 Conic Section (Circle check)</h2>
+      <input id="circleX" type="number" placeholder="x^2 coeff" class="p-2 border rounded w-32"/>
+      <input id="circleY" type="number" placeholder="y^2 coeff" class="p-2 border rounded w-32"/>
+      <button onclick="conic()" class="ml-2 px-4 py-2 bg-green-300 rounded-xl">Check</button>
+      <div class="mt-4 bg-green-100 rounded-xl p-3"><strong>Type:</strong> <span id="conicOutput"></span></div>
+    </section>
+
+  </main>
+
+  <!-- JS Logic -->
+  <script>
+    function renderMath() { MathJax.typesetPromise(); }
+
+    function differentiate() {
+      let input = document.getElementById("diffInput").value;
+      let result = Algebrite.diff(input, "x").toString();
+      document.getElementById("diffOutput").innerHTML = "$" + result + "$";
+      document.getElementById("diffSteps").innerHTML = "Derivative of $" + input + "$ using power rule.";
+      renderMath();
+    }
+
+    function integrate() {
+      let input = document.getElementById("intInput").value;
+      let result = Algebrite.integral(input, "x").toString();
+      document.getElementById("intOutput").innerHTML = "$" + result + " + C$";
+      document.getElementById("intSteps").innerHTML = "Integrated each term of $" + input + "$.";
+      renderMath();
+    }
+
+    function quadratic() {
+      let a = parseFloat(document.getElementById("quadA").value);
+      let b = parseFloat(document.getElementById("quadB").value);
+      let c = parseFloat(document.getElementById("quadC").value);
+      let d = b*b - 4*a*c;
+      if (d < 0) document.getElementById("quadOutput").innerHTML = "No Real Roots";
+      else {
+        let r1 = (-b + Math.sqrt(d)) / (2*a);
+        let r2 = (-b - Math.sqrt(d)) / (2*a);
+        document.getElementById("quadOutput").innerHTML = "x = " + r1 + ", " + r2;
+      }
+    }
+
+    function partialFraction() {
+      let expr = document.getElementById("pfInput").value;
+      let result = Algebrite.apart(expr).toString();
+      document.getElementById("pfOutput").innerHTML = result;
+      renderMath();
+    }
+
+    function probability() {
+      let f = parseFloat(document.getElementById("probFavourable").value);
+      let t = parseFloat(document.getElementById("probTotal").value);
+      document.getElementById("probOutput").innerHTML = (f/t).toFixed(3);
+    }
+
+    function statistics() {
+      let arr = document.getElementById("statsInput").value.split(",").map(Number);
+      let mean = math.mean(arr), median = math.median(arr), mode = math.mode(arr);
+      document.getElementById("statsOutput").innerHTML = "Mean=" + mean + ", Median=" + median + ", Mode=" + mode;
+    }
+
+    function percentage() {
+      let part = parseFloat(document.getElementById("perPart").value);
+      let total = parseFloat(document.getElementById("perTotal").value);
+      document.getElementById("perOutput").innerHTML = ((part/total)*100).toFixed(2) + "%";
+    }
+
+    function workProblem() {
+      let A = parseFloat(document.getElementById("workA").value);
+      let B = parseFloat(document.getElementById("workB").value);
+      let together = 1 / (1/A + 1/B);
+      document.getElementById("workOutput").innerHTML = together.toFixed(2) + " days";
+    }
+
+    function geometry() {
+      let l = parseFloat(document.getElementById("geoL").value);
+      let w = parseFloat(document.getElementById("geoW").value);
+      let area = l*w, peri = 2*(l+w);
+      document.getElementById("geoOutput").innerHTML = "Area=" + area + ", Perimeter=" + peri;
+    }
+
+    function vectors() {
+      let A = document.getElementById("vecA").value.split(",").map(Number);
+      let B = document.getElementById("vecB").value.split(",").map(Number);
+      let dot = math.dot(A,B);
+      let cross = math.cross(A,B);
+      document.getElementById("vecOutput").innerHTML = "Dot=" + dot + ", Cross=[" + cross + "]";
+    }
+
+    function conic() {
+      let x = parseFloat(document.getElementById("circleX").value);
+      let y = parseFloat(document.getElementById("circleY").value);
+      document.getElementById("conicOutput").innerHTML = (x === y) ? "Circle" : "Ellipse/Other";
+    }
+  </script>
+
+</body>
+</html>
